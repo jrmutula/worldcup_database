@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# using if loop to be able to run tests without affecting original database
+# running tests on test database without affecting original database
 
   if [[ $1 == "test" ]]
   then
@@ -9,7 +9,7 @@
     PSQL="psql --username=freecodecamp --dbname=worldcup -t --no-align -c"
   fi
 
-# start by emptying the rows in the tables of the database so we can rerun the file
+# empty rows in tables games and teams to input fresh data every time program runs
   echo $($PSQL "TRUNCATE TABLE games, teams")
 
 
@@ -17,16 +17,16 @@
   cat games.csv | while IFS="," read YEAR ROUND WINNER OPPONENT WINNER_GOALS OPPONENT_GOALS
   do
 
-# INSERT TEAMS TABLE DATA
+# filling in teams table data
 
-# GET WINNER TEAM NAME
+# get winner team name
   if [[ $WINNER != "winner" ]]
   then
   
 # get team name
   TEAM1_NAME=$($PSQL "SELECT name FROM teams WHERE name='$WINNER'")
             
-# if team name is not found we need to include the new team to the table
+# if team name is not found we need add the new team to the table
   if [[ -z $TEAM1_NAME ]]
   then
 
@@ -41,14 +41,14 @@
   fi
   fi
 
-# GET OPPONENT TEAM NAME
+# get opponent team name
   if [[ $OPPONENT != "opponent" ]]
   then
 
 # get team name
   TEAM2_NAME=$($PSQL "SELECT name FROM teams WHERE name='$OPPONENT'")
 
-# if team name is not found we need to include the new team to the table
+# if team name is not found we need add the new team to the table
   if [[ -z $TEAM2_NAME ]]
   then
 
@@ -63,17 +63,17 @@
   fi
   fi
 
-# INSERT GAMES TABLE DATA
+# filling in games table data
   if [[ YEAR != "year" ]]
   then
 
-# GET WINNER_ID
+# get winner_id
   WINNER_ID=$($PSQL "SELECT team_id FROM teams WHERE name='$WINNER'")
 
-# GET OPPONENT_ID
+# get opponent_id
   OPPONENT_ID=$($PSQL "SELECT team_id FROM teams WHERE name='$OPPONENT'")
 
-# INSERT NEW GAMES ROW
+# insert new matches or games
   INSERT_GAME=$($PSQL "INSERT INTO games(year, round, winner_id, opponent_id, winner_goals, opponent_goals) VALUES ($YEAR, '$ROUND', $WINNER_ID, $OPPONENT_ID, $WINNER_GOALS, $OPPONENT_GOALS)")
 
 # echo call to let us know what was added
